@@ -1,23 +1,38 @@
 <script lang="ts">
     import { onMount } from "svelte";
-
-    export const autoplay = false;
-    const src = "/beep.mp3";
-    let audio: HTMLAudioElement | null = null;
+    const BEEP_LOCATION = "/beep.mp3";
+    let autoplay = true;
+    let audio: HTMLAudioElement;
+    let intervalId: NodeJS.Timeout | null = null;
+    let intervalAsMilliseconds = 600;
 
     function play() {
-        audio?.play();
+        audio.play();
+        if (!intervalId) {
+            intervalId = setInterval(() => {
+                if (autoplay) {
+                    audio.play();
+                } else {
+                    if (intervalId) {
+                        clearInterval(intervalId);
+                        intervalId = null;
+                    }
+                }
+            }, intervalAsMilliseconds);
+        }
     }
 
     function pause() {
-        audio?.pause();
+        autoplay = false;
+        if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+        }
+        audio.pause();
     }
 
     onMount(() => {
-        audio = new Audio(src);
-        if (autoplay) {
-            audio.play();
-        }
+        audio = new Audio(BEEP_LOCATION);
     });
 </script>
 
